@@ -7,103 +7,64 @@
 
   <style>
     body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: #0f172a;
-      color: #e5e7eb;
+      background:#0f172a;
+      color:#e5e7eb;
+      font-family: Arial, sans-serif;
+      margin:0;
     }
-
     header {
-      background: #020617;
-      padding: 16px;
-      text-align: center;
-      font-size: 22px;
-      font-weight: bold;
-      border-bottom: 1px solid #1e293b;
+      padding:15px;
+      text-align:center;
+      background:#020617;
+      font-size:22px;
+      font-weight:bold;
     }
-
-    #posts {
-      max-width: 800px;
-      margin: 20px auto;
-      padding: 10px;
-    }
-
     .post {
-      background: #020617;
-      padding: 15px;
-      margin-bottom: 12px;
-      border-radius: 8px;
-      border: 1px solid #1e293b;
+      background:#020617;
+      margin:12px;
+      padding:12px;
+      border-radius:8px;
+      border:1px solid #1e293b;
     }
-
-    .post p {
-      margin: 0 0 8px;
-      line-height: 1.5;
-    }
-
-    .post a {
-      color: #38bdf8;
-      text-decoration: none;
-      font-size: 14px;
-    }
-
-    .post a:hover {
-      text-decoration: underline;
-    }
-
-    .error {
-      color: #f87171;
-      text-align: center;
-      margin-top: 20px;
-    }
+    a { color:#38bdf8; text-decoration:none; }
   </style>
 </head>
 
 <body>
 
-  <header>📢 Telegram Live Updates</header>
+<header>📢 Telegram Live Updates</header>
+<div id="posts">Loading...</div>
 
-  <div id="posts">
-    <p style="text-align:center;">Loading posts...</p>
-  </div>
+<script>
+const API = "https://telegram-bot-server-hdja.onrender.com/data";
 
-  <script>
-    const API_URL = "https://telegram-bot-server-hdja.onrender.com/data";
+fetch(API, { cache: "no-store" })
+  .then(res => res.text())
+  .then(text => {
+    const data = JSON.parse(text);
+    const box = document.getElementById("posts");
+    box.innerHTML = "";
 
-    async function loadPosts() {
-      try {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-
-        const container = document.getElementById("posts");
-        container.innerHTML = "";
-
-        if (!data || data.length === 0) {
-          container.innerHTML = "<p style='text-align:center;'>No posts yet</p>";
-          return;
-        }
-
-        data.reverse().forEach(post => {
-          const div = document.createElement("div");
-          div.className = "post";
-
-          div.innerHTML = `
-            <p>${post.text}</p>
-            <a href="${post.link}" target="_blank">Open in Telegram</a>
-          `;
-
-          container.appendChild(div);
-        });
-
-      } catch (err) {
-        document.getElementById("posts").innerHTML =
-          "<p class='error'>Failed to load posts</p>";
-      }
+    if (data.length === 0) {
+      box.innerHTML = "No posts yet";
+      return;
     }
 
-    loadPosts();
-    setInterval(loadPosts, 10000); // auto refresh every 10 sec
-  </script>
+    data.reverse().forEach(p => {
+      const div = document.createElement("div");
+      div.className = "post";
+      div.innerHTML = `
+        <p>${p.text}</p>
+        <a href="${p.link}" target="_blank">Open in Telegram</a>
+      `;
+      box.appendChild(div);
+    });
+  })
+  .catch(err => {
+    document.getElementById("posts").innerText =
+      "Failed to load posts: " + err;
+  });
+</script>
 
 </body>
 </html>
