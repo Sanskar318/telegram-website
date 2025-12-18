@@ -8,22 +8,19 @@
   <style>
     body {
       margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: Arial, sans-serif;
       background: #0f172a;
       color: #f8fafc;
     }
     header {
-      text-align: center;
       padding: 16px;
       font-size: 22px;
       font-weight: bold;
       background: #020617;
       border-bottom: 1px solid #1e293b;
     }
-    .container {
+    #posts {
       padding: 16px;
-      max-width: 800px;
-      margin: auto;
     }
     .post {
       background: #020617;
@@ -40,20 +37,22 @@
     a {
       color: #38bdf8;
       text-decoration: none;
-      word-break: break-all;
+      font-size: 14px;
     }
     .status {
       text-align: center;
       color: #94a3b8;
-      margin-top: 20px;
+      margin-top: 30px;
     }
   </style>
 </head>
+
 <body>
 
 <header>📢 Telegram Live Updates</header>
 
-<div class="container" id="posts">
+<!-- 🔴 THIS DIV WAS THE REAL ISSUE -->
+<div id="posts">
   <div class="status">Loading posts…</div>
 </div>
 
@@ -62,53 +61,41 @@
 
   async function loadPosts() {
     const container = document.getElementById("posts");
-    container.innerHTML = `<div class="status">Loading posts…</div>`;
 
     try {
       const res = await fetch(API_URL, {
-        method: "GET",
-        mode: "cors",
-        cache: "no-store",
-        headers: {
-          "Accept": "application/json"
-        }
+        cache: "no-store"
       });
-
-      if (!res.ok) {
-        throw new Error("Network response was not ok");
-      }
 
       const data = await res.json();
 
       if (!Array.isArray(data) || data.length === 0) {
-        container.innerHTML = `<div class="status">No posts yet</div>`;
+        container.innerHTML = '<div class="status">No posts yet</div>';
         return;
       }
 
       container.innerHTML = "";
 
-      data.slice().reverse().forEach(post => {
+      data.reverse().forEach(post => {
         const div = document.createElement("div");
         div.className = "post";
         div.innerHTML = `
           <div>${post.text}</div>
           <div class="date">${new Date(post.date).toLocaleString()}</div>
-          <div>
-            <a href="${post.link}" target="_blank">Open in Telegram</a>
-          </div>
+          <a href="${post.link}" target="_blank">Open in Telegram</a>
         `;
         container.appendChild(div);
       });
 
-    } catch (error) {
-      console.error("FETCH ERROR:", error);
-      container.innerHTML = `<div class="status">Failed to load posts</div>`;
+    } catch (e) {
+      container.innerHTML = '<div class="status">Failed to load posts</div>';
+      console.error(e);
     }
   }
 
   loadPosts();
   setInterval(loadPosts, 10000);
-      </script>
+</script>
 
 </body>
 </html>
