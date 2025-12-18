@@ -4,7 +4,7 @@ const path = require("path");
 
 const app = express();
 
-/* 🔓 CORS */
+/* ✅ CORS FIX (VERY IMPORTANT) */
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST");
@@ -14,60 +14,41 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-const DATA_FILE = path.join(__dirname, "posts.json");
+const DATA_FILE = path.join(__dirname, "data.json");
 
-/* Ensure file exists */
+/* ensure file exists */
 if (!fs.existsSync(DATA_FILE)) {
-  fs.writeFileSync(DATA_FILE, JSON.stringify([]));
+  fs.writeFileSync(DATA_FILE, "[]");
 }
 
-/* 🔔 TELEGRAM WEBHOOK */
+/* webhook */
 app.post("/webhook", (req, res) => {
   try {
-    const msg = req.body.channel_post;
-    if (!msg) return res.sendStatus(200);
+    const msg = req.body.message;
+    if (!msg || !msg.text) return res.sendStatus(200);
 
-    const posts = JSON.parse(fs.readFileSync(DATA_FILE));
+    const data = JSON.parse(fs.readFileSync(DATA_FILE));
 
-    let media = null;
-    let type = "text";
-
-    if (msg.photo) {
-      const photo = msg.photo[msg.photo.length - 1];
-      media = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${photo.file_id}`;
-      type = "image";
-    }
-
-    if (msg.video) {
-      media = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${msg.video.file_id}`;
-      type = "video";
-    }
-
-    posts.push({
-      text: msg.text || msg.caption || "",
-      media,
-      type,
+    data.push({
+      text: msg.text,
       date: new Date().toISOString(),
-      link: `https://t.me/${process.env.CHANNEL}/${msg.message_id}`
+      link: `https://t.me/${process.env.CHANNEL}`
     });
 
-    if (posts.length > 50) posts.shift();
-
-    fs.writeFileSync(DATA_FILE, JSON.stringify(posts, null, 2));
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
     res.sendStatus(200);
-  } catch (err) {
-    console.error(err);
+  } catch (e) {
+    console.log(e);
     res.sendStatus(500);
   }
 });
 
-/* 🌐 API */
+/* PUBLIC API */
 app.get("/data", (req, res) => {
-  const posts = JSON.parse(fs.readFileSync(DATA_FILE));
-  res.json(posts.slice().reverse());
+  res.setHeader("Content-Type", "application/json");
+  const data = fs.readFileSync(DATA_FILE);
+  res.send(data);
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log("Server running on", PORT);
-});
+app.listen(PORT, () => console.log("Server running on", PORT));
