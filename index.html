@@ -1,17 +1,151 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Telegram Live Updates</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: #0b1220;
+      color:#e5e7eb;
+    }
+    header{
+      padding:16px 20px;
+      background: linear-gradient(135deg,#111827,#0b1220);
+      border-bottom:1px solid #1f2937;
+      position: sticky;
+      top:0;
+    }
+    header h1{
+      margin:0;
+      font-size:20px;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .container{
+      max-width:900px;
+      margin:0 auto;
+      padding:16px;
+    }
+    .card{
+      background:#0f172a;
+      border:1px solid #1f2937;
+      border-radius:14px;
+      padding:14px 16px;
+      margin-bottom:12px;
+    }
+    .text{
+      font-size:15px;
+      line-height:1.5;
+      margin-bottom:8px;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+    .meta{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      font-size:12px;
+      color:#9ca3af;
+    }
+    .meta a{
+      color:#60a5fa;
+      text-decoration:none;
+    }
+    .meta a:hover{ text-decoration:underline; }
+    .center{
+      text-align:center;
+      color:#9ca3af;
+      padding:24px 0;
+    }
+    .loader{
+      display:inline-block;
+      width:18px;height:18px;
+      border:3px solid #334155;
+      border-top-color:#60a5fa;
+      border-radius:50%;
+      animation:spin 1s linear infinite;
+      vertical-align:middle;
+    }
+    @keyframes spin{ to{ transform:rotate(360deg);} }
+    footer{
+      text-align:center;
+      color:#64748b;
+      font-size:12px;
+      padding:16px;
+    }
+  </style>
+</head>
 <body>
 
-<h3>Frontend Test</h3>
-<pre id="out">Waiting...</pre>
+<header>
+  <h1>📢 Telegram Live Updates</h1>
+</header>
+
+<div class="container">
+  <div id="status" class="center">
+    <span class="loader"></span> Loading posts…
+  </div>
+  <div id="posts"></div>
+</div>
+
+<footer>
+  Auto-synced from Telegram
+</footer>
 
 <script>
-fetch("https://telegram-bot-server-hdja.onrender.com/data", {
-  cache: "no-store"
-})
-.then(r => r.text())
-.then(t => document.getElementById("out").innerText = t)
-.catch(e => document.getElementById("out").innerText = "ERROR: " + e);
+const API = "https://telegram-bot-server-hdja.onrender.com/data";
+const postsEl = document.getElementById("posts");
+const statusEl = document.getElementById("status");
+
+function formatDate(iso){
+  try{
+    const d = new Date(iso);
+    return d.toLocaleString();
+  }catch(e){
+    return iso;
+  }
+}
+
+async function loadPosts(){
+  try{
+    const res = await fetch(API, { cache: "no-store" });
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+
+    postsEl.innerHTML = "";
+    if(!data || data.length === 0){
+      statusEl.textContent = "No posts yet.";
+      return;
+    }
+    statusEl.remove();
+
+    data.slice().reverse().forEach(p=>{
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="text">${p.text || ""}</div>
+        <div class="meta">
+          <span>${formatDate(p.date)}</span>
+          ${p.link ? `<a href="${p.link}" target="_blank">View on Telegram</a>` : ""}
+        </div>
+      `;
+      postsEl.appendChild(card);
+    });
+  }catch(err){
+    statusEl.textContent = "Failed to load posts.";
+    console.error(err);
+  }
+}
+
+// first load
+loadPosts();
+
+// auto-refresh every 20 seconds
+setInterval(loadPosts, 20000);
 </script>
 
 </body>
