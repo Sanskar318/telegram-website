@@ -4,7 +4,7 @@ const path = require("path");
 
 const app = express();
 
-/* 🔓 CORS (VERY IMPORTANT) */
+/* 🔓 CORS */
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET,POST");
@@ -14,10 +14,9 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-/* 📁 DATA FILE */
 const DATA_FILE = path.join(__dirname, "posts.json");
 
-/* Ensure posts.json exists */
+/* Ensure file exists */
 if (!fs.existsSync(DATA_FILE)) {
   fs.writeFileSync(DATA_FILE, JSON.stringify([]));
 }
@@ -30,31 +29,45 @@ app.post("/webhook", (req, res) => {
 
     const posts = JSON.parse(fs.readFileSync(DATA_FILE));
 
+    let media = null;
+    let type = "text";
+
+    if (msg.photo) {
+      const photo = msg.photo[msg.photo.length - 1];
+      media = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${photo.file_id}`;
+      type = "image";
+    }
+
+    if (msg.video) {
+      media = `https://api.telegram.org/file/bot${process.env.BOT_TOKEN}/${msg.video.file_id}`;
+      type = "video";
+    }
+
     posts.push({
-      text: msg.text || "(no text)",
+      text: msg.text || msg.caption || "",
+      media,
+      type,
       date: new Date().toISOString(),
       link: `https://t.me/${process.env.CHANNEL}/${msg.message_id}`
     });
 
-    /* Keep only last 50 posts */
     if (posts.length > 50) posts.shift();
 
     fs.writeFileSync(DATA_FILE, JSON.stringify(posts, null, 2));
     res.sendStatus(200);
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
     res.sendStatus(500);
   }
 });
 
-/* 🌐 API FOR WEBSITE */
+/* 🌐 API */
 app.get("/data", (req, res) => {
   const posts = JSON.parse(fs.readFileSync(DATA_FILE));
   res.json(posts.slice().reverse());
 });
 
-/* 🚀 START SERVER */
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
+  console.log("Server running on", PORT);
 });
