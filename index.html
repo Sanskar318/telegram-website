@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Telegram Live Feed</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      background: #0f172a;
+      color: #f8fafc;
+      font-family: Arial, sans-serif;
+    }
+    header {
+      padding: 15px;
+      background: #020617;
+      text-align: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    .post {
+      background: #020617;
+      margin: 12px;
+      padding: 12px;
+      border-radius: 10px;
+    }
+    a {
+      color: #38bdf8;
+      text-decoration: none;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<header>📢 Telegram Live Updates</header>
+<div id="feed"></div>
+
+<script>
+fetch("https://telegram-bot-server-hdja.onrender.com/data")
+  .then(res => res.json())
+  .then(data => {
+    let html = "";
+    data.forEach(p => {
+      html += `
+        <div class="post">
+          <p>${p.text}</p>
+          <a href="${p.link}" target="_blank">Open on Telegram</a>
+        </div>
+      `;
+    });
+    document.getElementById("feed").innerHTML = html;
+  });
+</script>
+
+</body>
+</html>
