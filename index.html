@@ -1,65 +1,192 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Telegram Live Updates</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CricTV UI Demo</title>
+
+<meta name="robots" content="noindex,nofollow">
+
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
 <style>
+:root{
+  --bg:#00013a;
+  --bg2:#071b4f;
+  --card:#0b2f7c;
+  --text:#e6ecff;
+  --muted:#9db7ff;
+  --live:#ff1744;
+}
+*{box-sizing:border-box;margin:0;padding:0}
 body{
-  background:#0f172a;
-  color:#f8fafc;
-  font-family:Arial;
-  padding:20px;
+  background:linear-gradient(180deg,var(--bg),var(--bg2),var(--bg));
+  color:var(--text);
+  font-family:Arial,Helvetica,sans-serif;
+  overflow-x:hidden;
 }
-.post{
-  background:#020617;
-  border-radius:10px;
-  padding:15px;
-  margin:20px auto;
-  max-width:600px;
+h2{margin-bottom:10px}
+
+/* HEADER */
+header{
+  height:50px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(90deg,#0b2f7c,#071b4f,#00013a);
 }
-img, video{
+header img{height:26px}
+
+/* LAYOUT */
+.container{
+  max-width:1600px;
+  margin:auto;
+  padding:0 15px;
+}
+section{margin-top:30px}
+
+/* SCROLL ROW */
+.row{
+  display:flex;
+  gap:15px;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+.row::-webkit-scrollbar{display:none}
+
+/* CARD */
+.card{
+  min-width:240px;
+  aspect-ratio:16/9;
+  border-radius:12px;
+  overflow:hidden;
+  background:linear-gradient(135deg,#071b4f,#00013a);
+  box-shadow:0 6px 16px rgba(0,0,0,.6);
+  position:relative;
+}
+.card img{
   width:100%;
-  border-radius:8px;
-  margin:10px 0;
+  height:100%;
+  object-fit:cover;
 }
-.date{
+.card::after{
+  content:"";
+  position:absolute;
+  left:0;right:0;bottom:0;
+  height:40%;
+  background:linear-gradient(to top,rgba(0,0,0,.8),transparent);
+}
+.card-title{
+  position:absolute;
+  bottom:10px;
+  left:10px;
+  right:10px;
+  font-weight:bold;
+  z-index:2;
+}
+.badge{
+  position:absolute;
+  top:8px;
+  left:8px;
+  background:var(--live);
+  padding:4px 10px;
+  border-radius:10px;
   font-size:12px;
-  color:#94a3b8;
+  font-weight:bold;
+  z-index:2;
 }
-a{color:#38bdf8;text-decoration:none}
+
+/* FOOTER */
+footer{
+  margin-top:40px;
+  padding:25px 15px;
+  background:linear-gradient(135deg,#00013a,#071b4f);
+  border-top:1px solid rgba(255,255,255,.1);
+  text-align:center;
+  font-size:13px;
+  color:rgba(255,255,255,.7);
+}
 </style>
 </head>
 
 <body>
-<h1>📢 Telegram Live Updates</h1>
-<div id="posts">Loading...</div>
 
-<script>
-const API = "https://telegram-bot-server-hdja.onrender.com/data";
+<header>
+  <img src="https://crickettv.illegal.site/image/api/crickettv.png">
+</header>
 
-async function load(){
-  try{
-    const res = await fetch(API);
-    const data = await res.json();
+<div class="container">
 
-    document.getElementById("posts").innerHTML = data.map(p => `
-      <div class="post">
-        <div class="date">${new Date(p.date).toLocaleString()}</div>
+<!-- LIVE SCORES -->
+<section>
+  <h2>Live Scores</h2>
+  <div class="row">
+    <div class="card"><span class="badge">LIVE</span><img src="https://crickettv.illegal.site/img/a.png"><div class="card-title">Team A vs Team B</div></div>
+    <div class="card"><img src="https://crickettv.illegal.site/img/b.png"><div class="card-title">Team C vs Team D</div></div>
+    <div class="card"><img src="https://crickettv.illegal.site/img/c.png"><div class="card-title">Team E vs Team F</div></div>
+    <div class="card"><img src="https://crickettv.illegal.site/img/d.png"><div class="card-title">Team G vs Team H</div></div>
+  </div>
+</section>
 
-        ${p.type === "photo" ? `<img src="${p.file}">` : ""}
-        ${p.type === "video" ? `<video controls src="${p.file}"></video>` : ""}
+<!-- TODAY EVENTS -->
+<section>
+  <h2>Today Events</h2>
+  <div class="row">
+    <div class="card"><span class="badge">LIVE</span><img src="https://crickettv.illegal.site/img/t1.png"><div class="card-title">Today Match 1</div></div>
+    <div class="card"><img src="https://crickettv.illegal.site/img/t2.png"><div class="card-title">Today Match 2</div></div>
+    <div class="card"><img src="https://crickettv.illegal.site/img/t3.png"><div class="card-title">Today Match 3</div></div>
+  </div>
+</section>
 
-        <div>${p.text || ""}</div>
-        <a href="${p.link}" target="_blank">Open in Telegram →</a>
-      </div>
-    `).join("");
-  }catch(e){
-    document.getElementById("posts").innerText = "Failed to load posts";
-  }
-}
+<!-- UPCOMING -->
+<section>
+  <h2>Upcoming Matches</h2>
+  <div class="row">
+    <div class="card"><img src="https://crickettv.illegal.site/img/u1.png"><div class="card-title">Upcoming 1</div></div>
+    <div class="card"><img src="https://crickettv.illegal.site/img/u2.png"><div class="card-title">Upcoming 2</div></div>
+    <div class="card"><img src="https://crickettv.illegal.site/img/u3.png"><div class="card-title">Upcoming 3</div></div>
+  </div>
+</section>
 
-load();
-setInterval(load, 15000);
-</script>
+<!-- SONY LIV (FIXED 5 CARDS) -->
+<section>
+  <h2>Sony LIV</h2>
+  <div class="row">
+    <div class="card"><span class="badge">LIVE</span><img src="https://sonyliv.illegal.com/1.png"><div class="card-title">Sony Match 1</div></div>
+    <div class="card"><span class="badge">LIVE</span><img src="https://sonyliv.illegal.com/2.png"><div class="card-title">Sony Match 2</div></div>
+    <div class="card"><span class="badge">LIVE</span><img src="https://sonyliv.illegal.com/3.png"><div class="card-title">Sony Match 3</div></div>
+    <div class="card"><span class="badge">LIVE</span><img src="https://sonyliv.illegal.com/4.png"><div class="card-title">Sony Match 4</div></div>
+    <div class="card"><span class="badge">LIVE</span><img src="https://sonyliv.illegal.com/5.png"><div class="card-title">Sony Match 5</div></div>
+  </div>
+</section>
+
+<!-- FANCODE (FIXED 5 CARDS) -->
+<section>
+  <h2>FanCode</h2>
+  <div class="row">
+    <div class="card"><span class="badge">LIVE</span><img src="https://fancode.illegal.com/1.png"><div class="card-title">FanCode 1</div></div>
+    <div class="card"><span class="badge">LIVE</span><img src="https://fancode.illegal.com/2.png"><div class="card-title">FanCode 2</div></div>
+    <div class="card"><span class="badge">LIVE</span><img src="https://fancode.illegal.com/3.png"><div class="card-title">FanCode 3</div></div>
+    <div class="card"><span class="badge">LIVE</span><img src="https://fancode.illegal.com/4.png"><div class="card-title">FanCode 4</div></div>
+    <div class="card"><span class="badge">LIVE</span><img src="https://fancode.illegal.com/5.png"><div class="card-title">FanCode 5</div></div>
+  </div>
+</section>
+
+<!-- HIGHLIGHTS -->
+<section>
+  <h2>Highlights</h2>
+  <div class="row">
+    <div class="card"><img src="https://crickettv.illegal.site/img/h1.png"><div class="card-title">Highlight 1</div></div>
+    <div class="card"><img src="https://crickettv.illegal.site/img/h2.png"><div class="card-title">Highlight 2</div></div>
+    <div class="card"><img src="https://crickettv.illegal.site/img/h3.png"><div class="card-title">Highlight 3</div></div>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  Demo UI only • All domains are placeholders ( .illegal ) • No real streams
+</footer>
+
 </body>
-</html>
+    </html>
