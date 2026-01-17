@@ -1,7 +1,7 @@
 name: Update FanCode Data
 on:
   schedule:
-    - cron: '*/10 * * * *'
+    - cron: '*/15 * * * *'
   workflow_dispatch:
 
 jobs:
@@ -12,20 +12,20 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
-      - name: Fetch Data from Mobile API
+      - name: Fetch Data from Global CDN
         run: |
-          curl -L "https://www.fancode.com/api/v1/content/discover/sports-home" \
-          -H "User-Agent: FanCode/3.15.0 (Android 12; Pixel 6)" \
-          -H "X-Platform: android" \
-          -H "X-Client: mobile" \
-          -H "Accept: application/json" \
-          -H "Connection: keep-alive" > matches.json
+          # Is baar hum bypass headers ke saath direct request karenge
+          curl -s -L "https://www.fancode.com/api/v1/content/discover/sports-home" \
+          -H "authority: www.fancode.com" \
+          -H "accept: application/json" \
+          -H "user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36" \
+          -H "x-platform: web" > matches.json
           
       - name: Commit and Push
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           git add matches.json
-          git commit -m "Bypass Update" || echo "No changes"
+          git commit -m "Update matches data" || exit 0
           git push origin main
           
