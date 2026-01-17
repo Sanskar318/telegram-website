@@ -2,19 +2,24 @@ name: Update FanCode Data
 on:
   schedule:
     - cron: '*/10 * * * *'
-  workflow_dispatch: # Isse aap manually bhi button daba kar run kar sakte hain
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Ye line error 128 ko khatam karegi
+      contents: write
     steps:
       - uses: actions/checkout@v3
       
-      - name: Fetch Data from FanCode
+      - name: Fetch Data using Advanced Headers
         run: |
-          curl -H "X-Platform: android" -H "X-Client: mobile" "https://www.fancode.com/api/v1/content/home?section=all" > matches.json
+          curl -L -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+               -H "X-Platform: web" \
+               -H "Origin: https://www.fancode.com" \
+               -H "Referer: https://www.fancode.com/" \
+               -H "Accept: application/json" \
+               "https://www.fancode.com/api/v1/content/home?section=all" > matches.json
           
       - name: Commit and Push changes
         run: |
