@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FanCode Data Monitor</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: #fff; text-align: center; padding: 20px; }
+        .status-box { background: #1e1e1e; padding: 20px; border-radius: 10px; display: inline-block; margin-bottom: 20px; border: 1px solid #333; }
+        .green { color: #4caf50; font-weight: bold; }
+        .red { color: #f44336; font-weight: bold; }
+        .match-card { background: #252525; margin: 10px auto; padding: 15px; border-radius: 8px; max-width: 500px; text-align: left; border-left: 5px solid #007bff; }
+        .match-card img { width: 100%; border-radius: 5px; margin-bottom: 10px; }
+        .update-time { font-size: 0.8em; color: #888; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+        pre { background: #000; padding: 10px; text-align: left; overflow-x: auto; font-size: 12px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <h1>FanCode Data Monitor</h1>
+    
+    <div class="status-box" id="status-container">
+        <p>Checking JSON Data...</p>
+    </div>
+
+    <div id="data-view">
+        <p>Last Update: <span id="time" class="update-time">-</span></p>
+        <div id="match-list"></div>
+    </div>
+
+    <hr style="border: 0.5px solid #333; margin: 40px 0;">
+    <h3>Raw JSON Output (For Debugging)</h3>
+    <pre id="raw-json">Loading raw data...</pre>
+
+    <script>
+        function checkData() {
+            const statusBox = document.getElementById('status-container');
+            const matchList = document.getElementById('match-list');
+            const rawJson = document.getElementById('raw-json');
+            const timeSpan = document.getElementById('time');
+
+            // live_data.json fetch kar rahe hain
+            fetch('live_data.json?t=' + new Date().getTime())
+            .then(response => response.json())
+            .then(data => {
+                // Raw JSON dikhao
+                rawJson.textContent = JSON.stringify(data, null, 4);
+                timeSpan.textContent = data["last update time"] || "Unknown";
+
+                if (data.matches && data.matches.length > 0) {
+                    statusBox.innerHTML = `<p class="green">✔ SUCCESS: Found ${data.matches.length} matches!</p>`;
+                    
+                    let html = '';
+                    data.matches.forEach(m => {
+                        html += `
+                            <div class="match-card">
+                                <img src="${m.src}" alt="poster">
+                                <strong>${m.title}</strong><br>
+                                <small>Category: ${m.event_category} | ID: ${m.match_id}</small><br>
+                                <span class="${m.status === 'LIVE' ? 'green' : ''}">Status: ${m.status}</span><br>
+                                <a href="${m.adfree_url}" target="_blank" style="color:cyan; font-size:12px;">Test m3u8 Link</a>
+                            </div>
+                        `;
+                    });
+                    matchList.innerHTML = html;
+                } else {
+                    statusBox.innerHTML = `<p class="red">✖ ERROR: Matches array is EMPTY []</p>
+                    <small>Script chal gayi par FanCode ne data nahi bheja.</small>`;
+                    matchList.innerHTML = '';
+                }
+            })
+            .catch(err => {
+                statusBox.innerHTML = `<p class="red">✖ CRITICAL ERROR: Could not load live_data.json</p>`;
+                rawJson.textContent = "Error: " + err.message;
+            });
+        }
+
+        // Auto refresh every 30 seconds
+        checkData();
+        setInterval(checkData, 30000);
+    </script>
+</body>
+</html>
