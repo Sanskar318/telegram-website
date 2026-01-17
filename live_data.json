@@ -1,11 +1,6 @@
 {
-    "status": "success",
-    "last_updated": "2026-01-17 09:39:44",
-    "matches": [
-        {
-            "name": "No Live Match Currently",
-            "image": "https://www.fancode.com/skin/images/fancode-logo.png",
-            "url": "https://fancode-ind.vercel.app/api/stream.php?id=test&ext=.m3u8"
-        }
-    ]
+    "name": "Fancode Live Matches Data in Json",
+    "telegram": "https://t.me/your_channel",
+    "last update time": "09:44:36 AM 17-01-2026",
+    "matches": []
 }
