@@ -1,0 +1,22 @@
+name: Update FanCode Data
+on:
+  schedule:
+    - cron: '*/10 * * * *' # Har 10 minute mein update hoga
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Fetch Data
+        run: |
+          curl -H "X-Platform: android" -H "X-Client: mobile" "https://www.fancode.com/api/v1/content/home?section=all" > matches.json
+      - name: Commit and Push
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add matches.json
+          git commit -m "Update Matches" || exit 0
+          git push
+          
